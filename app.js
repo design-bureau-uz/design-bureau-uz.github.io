@@ -1,4 +1,5 @@
-"use strict";
+"use strict";async function loadMe(attempt){
+  attempt = attempt || 0;
 const CFG = window.APP_CONFIG || {};
 const STATUSES = [
   {k:"work",   t:"В работе",        c:"--accent"},
@@ -65,9 +66,13 @@ async function onSession(session){
   await loadMe();
 }
 
-async function loadMe(){
+  if(error){
+    // сразу после перехода по ссылке из письма вход иногда ещё не успел примениться — пробуем снова
+    if(attempt < 4){ setTimeout(()=>loadMe(attempt+1), 1500*(attempt+1)); return; }
+    show("scrAuth"); showAuthErr(errText(error)); return;
+  }
   const {data,error} = await S.sb.from("profiles").select("*").eq("id",S.session.user.id).maybeSingle();
-  if(error){ show("scrAuth"); showAuthErr(errText(error)); return; }
+setInterval(()=>loadMe(), 15000)
   S.me = data;
   clearInterval(S.pendingTimer);
   if(!data || data.role==="pending" || data.role==="blocked"){
