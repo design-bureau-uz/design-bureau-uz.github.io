@@ -1,5 +1,4 @@
-"use strict";async function loadMe(attempt){
-  attempt = attempt || 0;
+"use strict";
 const CFG = window.APP_CONFIG || {};
 const STATUSES = [
   {k:"work",   t:"В работе",        c:"--accent"},
@@ -66,13 +65,14 @@ async function onSession(session){
   await loadMe();
 }
 
+async function loadMe(attempt){
+  attempt = attempt || 0;
+  const {data,error} = await S.sb.from("profiles").select("*").eq("id",S.session.user.id).maybeSingle();
   if(error){
     // сразу после перехода по ссылке из письма вход иногда ещё не успел примениться — пробуем снова
     if(attempt < 4){ setTimeout(()=>loadMe(attempt+1), 1500*(attempt+1)); return; }
     show("scrAuth"); showAuthErr(errText(error)); return;
   }
-  const {data,error} = await S.sb.from("profiles").select("*").eq("id",S.session.user.id).maybeSingle();
-setInterval(()=>loadMe(), 15000)
   S.me = data;
   clearInterval(S.pendingTimer);
   if(!data || data.role==="pending" || data.role==="blocked"){
@@ -80,7 +80,7 @@ setInterval(()=>loadMe(), 15000)
       ? "Ваш доступ закрыт администратором."
       : "Руководитель должен подтвердить ваш доступ. Как только это произойдёт, страница откроется сама.";
     show("scrPending");
-    if(!data || data.role==="pending") S.pendingTimer = setInterval(loadMe, 15000);
+    if(!data || data.role==="pending") S.pendingTimer = setInterval(()=>loadMe(), 15000);
     return;
   }
   enterApp();
