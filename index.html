@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Объекты бюро</title>
+<meta name="theme-color" content="#1f5fbf">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Объекты">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Нет настроек -->
+<section class="screen center" id="scrSetup" hidden>
+  <div class="card narrow">
+    <h1 class="brand">Объекты бюро</h1>
+    <p>Приложение ещё не подключено к базе. Откройте файл <code>config.js</code> и впишите <b>Project URL</b> и <b>anon key</b> из Supabase.</p>
+    <p class="muted">Подробно — в файле <code>ИНСТРУКЦИЯ.md</code>.</p>
+  </div>
+</section>
+
+<!-- Вход / регистрация -->
+<section class="screen center" id="scrAuth" hidden>
+  <form class="card narrow" id="authForm" novalidate>
+    <h1 class="brand" id="brandAuth">Объекты бюро</h1>
+    <div class="seg full" role="tablist">
+      <button type="button" id="tabLogin" aria-pressed="true">Вход</button>
+      <button type="button" id="tabReg" aria-pressed="false">Регистрация</button>
+    </div>
+    <div class="f" id="fName" hidden><label for="aName">Имя и фамилия</label><input id="aName" autocomplete="name" maxlength="80" placeholder="Иван Петров"></div>
+    <div class="f"><label for="aEmail">Почта</label><input id="aEmail" type="email" autocomplete="email" required></div>
+    <div class="f" id="fPass"><label for="aPass">Пароль</label><input id="aPass" type="password" autocomplete="current-password" minlength="6" required></div>
+    <div class="err" id="authErr" hidden></div>
+    <div class="ok" id="authOk" hidden></div>
+    <button class="btn primary full" id="authBtn" type="submit">Войти</button>
+    <button class="link" type="button" id="forgotBtn">Забыли пароль?</button>
+  </form>
+</section>
+
+<!-- Новый пароль (по ссылке из письма) -->
+<section class="screen center" id="scrReset" hidden>
+  <form class="card narrow" id="resetForm" novalidate>
+    <h1 class="brand">Новый пароль</h1>
+    <div class="f"><label for="rPass">Пароль (не короче 6 символов)</label><input id="rPass" type="password" autocomplete="new-password" minlength="6" required></div>
+    <div class="err" id="resetErr" hidden></div>
+    <button class="btn primary full" type="submit">Сохранить пароль</button>
+  </form>
+</section>
+
+<!-- Ожидание подтверждения -->
+<section class="screen center" id="scrPending" hidden>
+  <div class="card narrow">
+    <h1 class="brand">Заявка отправлена</h1>
+    <p id="pendingText">Руководитель должен подтвердить ваш доступ. Как только это произойдёт, страница откроется сама.</p>
+    <button class="btn" id="pendingLogout">Выйти</button>
+  </div>
+</section>
+
+<!-- Приложение -->
+<section class="screen" id="scrApp" hidden>
+  <div class="wrap">
+    <header class="stamp">
+      <h1 id="brandApp">Объекты бюро</h1>
+      <div class="me">
+        <span class="avatar" id="meAv"></span>
+        <span class="me-name" id="meName"></span>
+        <button class="icon" id="logoutBtn" title="Выйти" aria-label="Выйти">⎋</button>
+      </div>
+      <div class="sub">
+        <div class="cell">Объектов <b id="cTotal">—</b></div>
+        <div class="cell">Проектировщиков <b id="cPeople">—</b></div>
+        <div class="cell">Просрочено <b id="cLate">—</b></div>
+        <div class="cell" id="cellTeam" hidden><button class="link" id="teamBtn">Команда <b id="cPendingBadge"></b></button></div>
+      </div>
+    </header>
+
+    <div class="note" id="notice" hidden></div>
+
+    <div class="summary" id="summary"></div>
+
+    <div class="bar">
+      <div class="seg" role="group" aria-label="Чьи объекты">
+        <button id="fAll" aria-pressed="true">Все</button>
+        <button id="fMine" aria-pressed="false">Мои</button>
+      </div>
+      <input class="search" id="q" type="search" placeholder="Поиск: название, адрес, заказчик">
+      <select class="btn" id="fPerson" aria-label="Проектировщик"></select>
+      <button class="btn" id="csvBtn" title="Выгрузить в Excel (CSV)">⇩ CSV</button>
+      <button class="btn primary" id="addBtn">+ Объект</button>
+    </div>
+
+    <section class="list">
+      <div class="head"><div>Объект</div><div>Система</div><div>Стадия</div><div>Статус</div><div>Срок</div><div>Проектировщик</div><div></div></div>
+      <div id="rows"><div class="empty"><strong>Загружаю реестр…</strong></div></div>
+    </section>
+  </div>
+</section>
+
+<!-- Форма объекта -->
+<div class="overlay" id="ovObj" hidden>
+  <form class="card sheet" id="objForm" novalidate>
+    <h2 id="objTitle">Новый объект</h2>
+    <div class="f"><label for="iName">Название объекта *</label><input id="iName" maxlength="200" required placeholder="ЖК Афият, блок 3"></div>
+    <div class="grid2">
+      <div class="f"><label for="iAddr">Город / адрес</label><input id="iAddr" maxlength="200"></div>
+      <div class="f"><label for="iClient">Заказчик</label><input id="iClient" maxlength="200"></div>
+    </div>
+    <div class="grid2">
+      <div class="f"><label for="iSys">Система</label>
+        <select id="iSys"><option>VRF</option><option>Чиллер-фанкойл</option><option>Вентиляция</option><option>Сплит-системы</option><option>Отопление</option><option>Комплекс ОВиК</option><option>Другое</option></select></div>
+      <div class="f"><label for="iStage">Стадия</label>
+        <select id="iStage"><option>Эскиз / ТКП</option><option>Стадия П</option><option>Стадия Р</option><option>Исполнительная</option><option>Авторский надзор</option></select></div>
+    </div>
+    <div class="grid2">
+      <div class="f"><label for="iStatus">Статус</label><select id="iStatus"></select></div>
+      <div class="f"><label for="iDue">Срок сдачи</label><input id="iDue" type="date"></div>
+    </div>
+    <div class="f"><label for="iNote">Заметка</label><textarea id="iNote" maxlength="2000" placeholder="Что сделано, что ждём от заказчика"></textarea></div>
+    <div class="muted small" id="objMeta"></div>
+    <div class="err" id="objErr" hidden></div>
+    <div class="actions">
+      <button type="button" class="btn danger" id="delBtn" hidden>Удалить</button>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="objCancel">Отмена</button>
+      <button type="submit" class="btn primary" id="objSave">Сохранить</button>
+    </div>
+  </form>
+</div>
+
+<!-- Команда (для администратора) -->
+<div class="overlay" id="ovTeam" hidden>
+  <div class="card sheet wide">
+    <div class="actions"><h2 class="grow">Команда</h2><button class="btn" id="teamClose">Закрыть</button></div>
+    <p class="muted small">Новые сотрудники регистрируются сами по ссылке на приложение, а вы подтверждаете их здесь.</p>
+    <div id="teamList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
