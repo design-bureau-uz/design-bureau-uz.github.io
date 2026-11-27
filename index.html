@@ -64,6 +64,17 @@
 .hmeet:hover b{color:var(--accent)}
 .homego{display:flex;justify-content:center;padding-top:4px}
 @media (max-width:560px){ .hmeet{grid-template-columns:1fr} .hmeet .who{justify-self:start} }
+/* Подбор */
+#selFilter{flex-wrap:wrap}
+#selFilter .muted{font-size:12px}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto 34px;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.srow:last-child{border-bottom:0}
+.st{font-weight:600;overflow-wrap:anywhere}
+.ss{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:2px;overflow-wrap:anywhere}
+.ss a{color:var(--accent)}
+.ss .avatar{width:18px;height:18px;font-size:8px}
+.sright{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.tabs{flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -139,6 +150,7 @@
         <button id="tabHome" aria-pressed="true">Главная</button>
         <button id="tabObj" aria-pressed="false">Объекты</button>
         <button id="tabMeet" aria-pressed="false">Встречи <b class="badge" id="cMeetBadge" hidden></b></button>
+        <button id="tabSel" aria-pressed="false">Подбор <b class="badge" id="cSelBadge" hidden></b></button>
       </div>
       <div class="seg" id="segMine" role="group" aria-label="Чьи записи" hidden>
         <button id="fAll" aria-pressed="true">Все</button>
@@ -178,6 +190,17 @@
       </div>
       <section class="list" id="meetList"><div class="empty"><strong>Загружаю встречи…</strong></div></section>
     </div>
+
+    <div class="view" id="viewSel" hidden>
+      <div class="bar">
+        <div class="seg" id="selFilter" role="group" aria-label="Статус подбора"></div>
+      </div>
+      <div class="bar">
+        <input class="search" id="sq" type="search" placeholder="Поиск: что подбираем, заказчик, бренд">
+        <button class="btn primary" id="addSelBtn">+ Подбор</button>
+      </div>
+      <section class="list" id="selList"><div class="empty"><strong>Загружаю подборы…</strong></div></section>
+    </div>
   </div>
 </section>
 
@@ -204,6 +227,10 @@
     <div class="objmeet" id="objMeetBox" hidden>
       <div class="actions"><b class="grow">Встречи по объекту</b><button type="button" class="btn" data-mnewobj="1">+ Встреча</button></div>
       <div id="objMeetList"></div>
+    </div>
+    <div class="objmeet" id="objSelBox" hidden>
+      <div class="actions"><b class="grow">Подборы по объекту</b><button type="button" class="btn" data-snewobj="1">+ Подбор</button></div>
+      <div id="objSelList"></div>
     </div>
     <div class="muted small" id="objMeta"></div>
     <div class="err" id="objErr" hidden></div>
@@ -244,6 +271,42 @@
   </form>
 </div>
 
+<!-- Форма подбора -->
+<div class="overlay" id="ovSel" hidden>
+  <form class="card sheet" id="selForm" novalidate>
+    <h2 id="selTitle">Новый подбор</h2>
+    <div class="f"><label for="sTitle">Что подбираем *</label><input id="sTitle" maxlength="200" placeholder="VRF на коттедж 350 м²"></div>
+    <div class="grid2">
+      <div class="f"><label for="sClient">Заказчик / от кого запрос</label><input id="sClient" maxlength="200"></div>
+      <div class="f"><label for="sObj">Объект</label><select id="sObj"></select></div>
+    </div>
+    <div class="grid2">
+      <div class="f"><label for="sSys">Система</label>
+        <select id="sSys"><option>VRF</option><option>Чиллер-фанкойл</option><option>Фанкойлы</option><option>Вентиляция / ПВУ</option><option>Сплит-системы</option><option>Мультисплит</option><option>Отопление</option><option>Другое</option></select></div>
+      <div class="f"><label for="sBrand">Бренд</label><input id="sBrand" maxlength="60" list="brandList" placeholder="MDV"></div>
+    </div>
+    <datalist id="brandList"><option value="MDV"><option value="Midea"><option value="Daikin"><option value="Gree"><option value="Haier"><option value="LG"><option value="Samsung"><option value="Mitsubishi Electric"><option value="Hisense"><option value="Kentatsu"></datalist>
+    <div class="grid2">
+      <div class="f"><label for="sCap">Мощность, кВт</label><input id="sCap" inputmode="decimal" maxlength="12" placeholder="45,5"></div>
+      <div class="f"><label for="sStatus">Статус</label>
+        <select id="sStatus"><option value="work">В работе</option><option value="sent">Отправлен</option><option value="won">Согласован</option><option value="lost">Отказ</option></select></div>
+    </div>
+    <div class="grid2">
+      <div class="f"><label for="sDue">Срок</label><input id="sDue" type="date"></div>
+      <div class="f"><label for="sLink">Ссылка на файл подбора</label><input id="sLink" type="url" maxlength="500" placeholder="https://drive.google.com/…"></div>
+    </div>
+    <div class="f"><label for="sNote">Заметка</label><textarea id="sNote" maxlength="2000" placeholder="Состав, цена, что уточнить"></textarea></div>
+    <div class="muted small" id="selMeta"></div>
+    <div class="err" id="selErr" hidden></div>
+    <div class="actions">
+      <button type="button" class="btn danger" id="sDel" hidden>Удалить</button>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="sCancel">Отмена</button>
+      <button type="submit" class="btn primary" id="sSave">Сохранить</button>
+    </div>
+  </form>
+</div>
+
 <!-- Команда (для администратора) -->
 <div class="overlay" id="ovTeam" hidden>
   <div class="card sheet wide">
@@ -259,6 +322,7 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script src="meetings.js"></script>
+<script src="selections.js"></script>
 <script src="home.js"></script>
 </body>
 </html>
