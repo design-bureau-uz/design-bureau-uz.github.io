@@ -75,6 +75,17 @@
 .ss .avatar{width:18px;height:18px;font-size:8px}
 .sright{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .tabs{flex-wrap:wrap}
+/* Файлы */
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+label.btn{cursor:pointer}
+.fitem{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"t n d" "t m d";gap:2px 10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.fitem:last-child{border-bottom:0}
+.ftype{grid-area:t;font-family:var(--f-mono);font-size:11px;font-weight:500;padding:6px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+.ftype.pdf{background:var(--bad-soft);color:var(--bad)}
+.fname{grid-area:n;border:0;background:none;padding:0;text-align:left;color:var(--fg);font-weight:500;overflow-wrap:anywhere;cursor:pointer}
+.fname:hover{color:var(--accent);text-decoration:underline}
+.fmeta{grid-area:m}
+.fdel{grid-area:d;width:auto;min-width:32px;padding:0 6px;font-size:13px}
 </style>
 </head>
 <body>
@@ -224,6 +235,11 @@
       <div class="f"><label for="iDue">Срок сдачи</label><input id="iDue" type="date"></div>
     </div>
     <div class="f"><label for="iNote">Заметка</label><textarea id="iNote" maxlength="2000" placeholder="Что сделано, что ждём от заказчика"></textarea></div>
+    <div class="objmeet" id="objFileBox" hidden>
+      <div class="actions"><b class="grow">Файлы (DWG, PDF)</b><label class="btn" for="fileInput">+ Файл</label><input type="file" id="fileInput" class="vh" accept=".dwg,.dxf,.pdf" multiple></div>
+      <div id="objFileList"></div>
+      <div class="muted small" id="fileProg" hidden></div>
+    </div>
     <div class="objmeet" id="objMeetBox" hidden>
       <div class="actions"><b class="grow">Встречи по объекту</b><button type="button" class="btn" data-mnewobj="1">+ Встреча</button></div>
       <div id="objMeetList"></div>
@@ -323,6 +339,7 @@
 <script src="app.js"></script>
 <script src="meetings.js"></script>
 <script src="selections.js"></script>
+<script src="files.js"></script>
 <script src="home.js"></script>
 </body>
 </html>
