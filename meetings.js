@@ -51,8 +51,8 @@ const _openObj=openObj;
 openObj=function(id){ _openObj(id); refreshObjMeetings(); };
 
 // ---------- страницы: Главная / Объекты / Встречи (адрес #objects, #meetings) ----------
-const VIEWS={home:["viewHome","tabHome",""], obj:["viewObj","tabObj","objects"], meet:["viewMeet","tabMeet","meetings"]};
-function viewFromHash(){ const h=location.hash.slice(1); return h==="objects"?"obj":h==="meetings"?"meet":"home"; }
+const VIEWS={home:["viewHome","tabHome",""], obj:["viewObj","tabObj","objects"], meet:["viewMeet","tabMeet","meetings"], sel:["viewSel","tabSel","selections"]};
+function viewFromHash(){ const h=location.hash.slice(1); return h==="objects"?"obj":h==="meetings"?"meet":h==="selections"?"sel":"home"; }
 function setView(v){
   if(!VIEWS[v]) v="home";
   S.view=v;
@@ -69,6 +69,7 @@ window.addEventListener("popstate",()=>setView(viewFromHash()));
 $("tabHome").onclick=()=>goView("home");
 $("tabObj").onclick=()=>goView("obj");
 $("tabMeet").onclick=()=>goView("meet");
+$("tabSel").onclick=()=>goView("sel");
 
 // ---------- список встреч ----------
 function renderMeetings(){
