@@ -13,6 +13,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="styles.css">
+<style>
+/* Встречи */
+.view{display:flex;flex-direction:column;gap:18px}
+.bar .grow{flex:1}
+.tabs button{font-weight:500;padding:9px 18px}
+.badge{display:inline-block;min-width:20px;padding:1px 6px;margin-left:4px;border-radius:999px;background:var(--accent);color:var(--on-accent);font-size:12px;font-variant-numeric:tabular-nums}
+.mday{padding:8px 14px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+.mday.today{color:var(--accent);font-weight:600}
+.mrow{display:grid;grid-template-columns:58px minmax(0,1fr) 28px 34px;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mt{font-weight:600;overflow-wrap:anywhere}
+.mrow.done .mt{text-decoration:line-through;color:var(--muted)}
+.msub{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:2px;overflow-wrap:anywhere}
+.msub .avatar{width:18px;height:18px;font-size:8px}
+.mcheck{width:20px;height:20px;accent-color:var(--ok);cursor:pointer}
+.objmeet{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.objmeet .item{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;text-align:left;border:0;background:none;padding:4px 0;color:inherit;font-size:14px}
+.objmeet .item:hover .mt{color:var(--accent)}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+.chk input{width:18px;height:18px;accent-color:var(--ok)}
+</style>
 </head>
 <body>
 
@@ -82,23 +103,45 @@
 
     <div class="note" id="notice" hidden></div>
 
-    <div class="summary" id="summary"></div>
-
     <div class="bar">
-      <div class="seg" role="group" aria-label="Чьи объекты">
+      <div class="seg tabs" role="group" aria-label="Раздел">
+        <button id="tabObj" aria-pressed="true">Объекты</button>
+        <button id="tabMeet" aria-pressed="false">Встречи <b class="badge" id="cMeetBadge" hidden></b></button>
+      </div>
+      <div class="seg" role="group" aria-label="Чьи записи">
         <button id="fAll" aria-pressed="true">Все</button>
         <button id="fMine" aria-pressed="false">Мои</button>
       </div>
-      <input class="search" id="q" type="search" placeholder="Поиск: название, адрес, заказчик">
-      <select class="btn" id="fPerson" aria-label="Проектировщик"></select>
-      <button class="btn" id="csvBtn" title="Выгрузить в Excel (CSV)">⇩ CSV</button>
-      <button class="btn primary" id="addBtn">+ Объект</button>
     </div>
 
-    <section class="list">
-      <div class="head"><div>Объект</div><div>Система</div><div>Стадия</div><div>Статус</div><div>Срок</div><div>Проектировщик</div><div></div></div>
-      <div id="rows"><div class="empty"><strong>Загружаю реестр…</strong></div></div>
-    </section>
+    <div class="view" id="viewObj">
+      <div class="summary" id="summary"></div>
+
+      <div class="bar">
+        <input class="search" id="q" type="search" placeholder="Поиск: название, адрес, заказчик">
+        <select class="btn" id="fPerson" aria-label="Проектировщик"></select>
+        <button class="btn" id="csvBtn" title="Выгрузить в Excel (CSV)">⇩ CSV</button>
+        <button class="btn primary" id="addBtn">+ Объект</button>
+      </div>
+
+      <section class="list">
+        <div class="head"><div>Объект</div><div>Система</div><div>Стадия</div><div>Статус</div><div>Срок</div><div>Проектировщик</div><div></div></div>
+        <div id="rows"><div class="empty"><strong>Загружаю реестр…</strong></div></div>
+      </section>
+    </div>
+
+    <div class="view" id="viewMeet" hidden>
+      <div class="bar">
+        <div class="seg" role="group" aria-label="Период">
+          <button data-period="up" aria-pressed="true">Предстоящие</button>
+          <button data-period="past" aria-pressed="false">Прошедшие</button>
+          <button data-period="all" aria-pressed="false">Все</button>
+        </div>
+        <span class="grow"></span>
+        <button class="btn primary" id="addMeetBtn">+ Встреча</button>
+      </div>
+      <section class="list" id="meetList"><div class="empty"><strong>Загружаю встречи…</strong></div></section>
+    </div>
   </div>
 </section>
 
@@ -122,6 +165,10 @@
       <div class="f"><label for="iDue">Срок сдачи</label><input id="iDue" type="date"></div>
     </div>
     <div class="f"><label for="iNote">Заметка</label><textarea id="iNote" maxlength="2000" placeholder="Что сделано, что ждём от заказчика"></textarea></div>
+    <div class="objmeet" id="objMeetBox" hidden>
+      <div class="actions"><b class="grow">Встречи по объекту</b><button type="button" class="btn" data-mnewobj="1">+ Встреча</button></div>
+      <div id="objMeetList"></div>
+    </div>
     <div class="muted small" id="objMeta"></div>
     <div class="err" id="objErr" hidden></div>
     <div class="actions">
@@ -129,6 +176,34 @@
       <span class="grow"></span>
       <button type="button" class="btn" id="objCancel">Отмена</button>
       <button type="submit" class="btn primary" id="objSave">Сохранить</button>
+    </div>
+  </form>
+</div>
+
+<!-- Форма встречи -->
+<div class="overlay" id="ovMeet" hidden>
+  <form class="card sheet" id="meetForm" novalidate>
+    <h2 id="meetTitle">Новая встреча</h2>
+    <div class="grid2">
+      <div class="f"><label for="mKind">Тип</label>
+        <select id="mKind"><option value="meeting">Встреча</option><option value="visit">Выезд на объект</option><option value="call">Звонок</option></select></div>
+      <div class="f"><label for="mObj">Объект</label><select id="mObj"></select></div>
+    </div>
+    <div class="f"><label for="mTitle">О чём *</label><input id="mTitle" maxlength="200" placeholder="Согласование трасс с заказчиком"></div>
+    <div class="grid2">
+      <div class="f"><label for="mDate">Дата *</label><input id="mDate" type="date"></div>
+      <div class="f"><label for="mTime">Время</label><input id="mTime" type="time"></div>
+    </div>
+    <div class="f"><label for="mPlace">Где / с кем</label><input id="mPlace" maxlength="200" placeholder="Офис заказчика, главный инженер"></div>
+    <div class="f"><label for="mNote">Итоги / заметка</label><textarea id="mNote" maxlength="2000" placeholder="О чём договорились"></textarea></div>
+    <label class="chk"><input type="checkbox" id="mDone"> Встреча проведена</label>
+    <div class="muted small" id="meetMeta"></div>
+    <div class="err" id="meetErr" hidden></div>
+    <div class="actions">
+      <button type="button" class="btn danger" id="mDel" hidden>Удалить</button>
+      <span class="grow"></span>
+      <button type="button" class="btn" id="mCancel">Отмена</button>
+      <button type="submit" class="btn primary" id="mSave">Сохранить</button>
     </div>
   </form>
 </div>
@@ -147,5 +222,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+<script src="meetings.js"></script>
 </body>
 </html>
