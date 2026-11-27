@@ -33,6 +33,37 @@
 .objmeet .item:hover .mt{color:var(--accent)}
 .chk{display:flex;gap:8px;align-items:center;font-size:14px}
 .chk input{width:18px;height:18px;accent-color:var(--ok)}
+/* Главная */
+#homeBody{display:flex;flex-direction:column;gap:18px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.tile .n{font-family:var(--f-display);font-size:26px;font-weight:500;font-variant-numeric:tabular-nums}
+.tile .l{font-size:12px;color:var(--muted)}
+.tile.bad .n{color:var(--bad)}
+.homenote{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.sechead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:6px}
+.sec{font-family:var(--f-display);font-weight:500;font-size:18px;margin:0}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.phead{display:flex;gap:12px;align-items:center}
+.phead .avatar{width:42px;height:42px;font-size:15px}
+.pname{display:flex;flex-direction:column;min-width:0}
+.pname b{overflow-wrap:anywhere}
+.pstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;border-block:1px solid var(--line);padding-block:10px}
+.pstat{display:flex;flex-direction:column;align-items:flex-start}
+.pstat b{font-family:var(--f-display);font-size:20px;font-weight:500;font-variant-numeric:tabular-nums}
+.pstat span{font-size:11px;color:var(--muted)}
+.pstat.bad b{color:var(--bad)}
+.plist{display:flex;flex-direction:column;gap:4px}
+.pobj{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;border:0;background:none;padding:4px 0;text-align:left;color:inherit;font-size:14px}
+.pobj .pon{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pobj:hover .pon{color:var(--accent)}
+.pnext{font-size:14px;overflow-wrap:anywhere}
+.hmeet{display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:10px 14px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;color:inherit}
+.hmeet:last-child{border-bottom:0}
+.hmeet:hover b{color:var(--accent)}
+.homego{display:flex;justify-content:center;padding-top:4px}
+@media (max-width:560px){ .hmeet{grid-template-columns:1fr} .hmeet .who{justify-self:start} }
 </style>
 </head>
 <body>
@@ -105,16 +136,21 @@
 
     <div class="bar">
       <div class="seg tabs" role="group" aria-label="Раздел">
-        <button id="tabObj" aria-pressed="true">Объекты</button>
+        <button id="tabHome" aria-pressed="true">Главная</button>
+        <button id="tabObj" aria-pressed="false">Объекты</button>
         <button id="tabMeet" aria-pressed="false">Встречи <b class="badge" id="cMeetBadge" hidden></b></button>
       </div>
-      <div class="seg" role="group" aria-label="Чьи записи">
+      <div class="seg" id="segMine" role="group" aria-label="Чьи записи" hidden>
         <button id="fAll" aria-pressed="true">Все</button>
         <button id="fMine" aria-pressed="false">Мои</button>
       </div>
     </div>
 
-    <div class="view" id="viewObj">
+    <div class="view" id="viewHome">
+      <div id="homeBody"><div class="empty"><strong>Загружаю…</strong></div></div>
+    </div>
+
+    <div class="view" id="viewObj" hidden>
       <div class="summary" id="summary"></div>
 
       <div class="bar">
@@ -223,5 +259,6 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script src="meetings.js"></script>
+<script src="home.js"></script>
 </body>
 </html>
