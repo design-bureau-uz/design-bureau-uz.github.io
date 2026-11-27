@@ -50,20 +50,30 @@ render=function(){ _render(); renderMeetings(); };
 const _openObj=openObj;
 openObj=function(id){ _openObj(id); refreshObjMeetings(); };
 
-// ---------- вкладки ----------
+// ---------- страницы: Главная / Объекты / Встречи (адрес #objects, #meetings) ----------
+const VIEWS={home:["viewHome","tabHome",""], obj:["viewObj","tabObj","objects"], meet:["viewMeet","tabMeet","meetings"]};
+function viewFromHash(){ const h=location.hash.slice(1); return h==="objects"?"obj":h==="meetings"?"meet":"home"; }
 function setView(v){
+  if(!VIEWS[v]) v="home";
   S.view=v;
-  $("viewObj").hidden = v!=="obj"; $("viewMeet").hidden = v!=="meet";
-  $("tabObj").setAttribute("aria-pressed", v==="obj"); $("tabMeet").setAttribute("aria-pressed", v==="meet");
-  try{ localStorage.setItem("ob-view",v); }catch{}
+  for(const k in VIEWS){ $(VIEWS[k][0]).hidden = k!==v; $(VIEWS[k][1]).setAttribute("aria-pressed", k===v); }
+  $("segMine").hidden = v==="home";
 }
-try{ const v=localStorage.getItem("ob-view"); if(v==="meet") S.view="meet"; }catch{}
-$("tabObj").onclick=()=>setView("obj");
-$("tabMeet").onclick=()=>setView("meet");
+window.goView=function(v){
+  setView(v);
+  const h=VIEWS[S.view][2];
+  if(location.hash.slice(1)!==h) history.pushState(null,"", h ? "#"+h : location.pathname+location.search);
+};
+S.view=viewFromHash();
+window.addEventListener("popstate",()=>setView(viewFromHash()));
+$("tabHome").onclick=()=>goView("home");
+$("tabObj").onclick=()=>goView("obj");
+$("tabMeet").onclick=()=>goView("meet");
 
 // ---------- список встреч ----------
 function renderMeetings(){
   if(!S.me) return;
+  if(window.renderHome) window.renderHome();
   const t=today();
   const mineOk=m=>!S.filterMine || m.owner===S.me.id;
   const all=[...S.meetings.values()].filter(mineOk);
